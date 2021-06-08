@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 
+// Register a user
 // Public  / api/users
 router.post('/', [
     body('name', 'Name is required').not().isEmpty(),
@@ -26,7 +27,7 @@ router.post('/', [
        // See if userbexists
        let user = await User.findOne({email: email});
 
-       if(user) {
+       if(!user) {
            return res.status(400).json({ errors: [{msg: 'User already exists'}]});
        }
         // If user does not exist , Get user's gravatar
@@ -62,9 +63,5 @@ router.post('/', [
     }     
   // send data. excess data with req.body 
 });
-
-
-
-
 
 module.exports = router;
