@@ -5,6 +5,7 @@ const User = require('../../model/User');
 const Profile = require('../../model/Profile');
 const Post = require('../../model/Post');
 const config = require('config');
+const { body, validationResult } = require('express-validator');
 
 
 router.get('/myprofile',auth, async (req, res) =>  {
@@ -21,5 +22,74 @@ router.get('/myprofile',auth, async (req, res) =>  {
         res.status(500).send('Server error');
     }
 });
+
+// Create or Update user profle --Private
+router.post('/', [auth, [
+    body('status', 'Status is required').not().isEmpty(),
+    body('skills', 'Skills is required ').not().isEmpty()
+]], 
+async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+    }
+
+       // destructure the request
+       const {
+        company,
+        website,
+        skills,
+        location,
+        bio,
+        status,
+        githubusername,
+        youtube,
+        telegram,
+        linkedin
+      } = req.body;
+
+      const profileFields = {};
+      profileFields.user = req.user.id;
+      if(company) profileFields.company = company;
+      if(website) profileFields.website = website;
+      if(location) profileFields.location = location;
+      if(bio) profileFields.bio = bio;
+      if(status) profileFields.status = status;
+      if(githubusername) profileFields.githubusername = githubusername;
+      if(skills) {
+        //   turning into array --split converts strings into array separated by comma
+          profileFields.skills = skills.split(',').map(skill => skill.trim());   
+      }
+      profileFields.social = {}
+      if(youtube) profileFields.social.youtube = youtube;
+      if(telegram) profileFields.social.telegram = telegram;
+      if(linkedin) profileFields.social.linkedin = linkedin;
+
+        console.log(profileFields.skills);
+        
+        try {
+            let profile = await Profile.findOne({user: req.user._id});
+
+            // update
+            if(profile) {
+                profile = await Profile.findByIdAndUpdate(
+                {user: req.user._id}, 
+                {$set: profileFields},
+                {new: true});
+
+                return res.json(profile);
+            }
+
+            // not found , create profile
+            profile = new Profile(profileFields);
+            await profile.save();
+            res.json(profile);
+
+        } catch (error) {
+            console.error(error.message);
+            res.status(500).send('Server error');
+        }
+      }
+);
 
 module.exports = router;
