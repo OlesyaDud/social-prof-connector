@@ -1,8 +1,12 @@
 import React, { Fragment, useState} from 'react';
 import axios from 'axios';
+import {connect} from 'react-redux';
 import { Link } from 'react-router-dom';
+import { setAlert } from '../../actions/alert';
+import PropTypes from 'prop-types';
 
-const Register = () => {
+
+const Register = (props) => {
     const [formData, setFormData]=useState({
         name: '',
         email: '',
@@ -18,7 +22,8 @@ const Register = () => {
     const onSubmit = async e => {
         e.preventDefault();
         if(password !== password2) {
-            console.log('asa')
+          // danger is alert type --or css property
+            props.setAlert('Passwords do not match', 'danger')
         }else {
             console.log('sss')
         }
@@ -117,6 +122,11 @@ const Register = () => {
         </p>
     </Fragment>
     )
+};
+
+Register.protoType = {
+  setAlert: PropTypes.func.isRequired
 }
 
-export default Register
+// setAlert will allow access props.setAlert
+export default connect(null, {setAlert})(Register);
