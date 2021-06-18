@@ -1,21 +1,50 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCoffee } from '@fortawesome/free-solid-svg-icons'
+import { faCoffee, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { logout } from '../../actions/auth';
 
-const Navbar = () => {
-    return (
-        <nav className="navbar bg-dark">
-        <h1>
-          <Link to='/'><FontAwesomeIcon icon={faCoffee} /> DevConnector</Link>
-        </h1>
+const Navbar = ({auth: {isAuthenticated, loading}, logout}) => {
+
+  const authLinks = (
+    <ul>
+      <li>
+        <a onClick={logout} href="#!"><FontAwesomeIcon icon={faSignOutAlt} /> {''} 
+        <span className="hide-sm">Logout</span></a>
+      </li>
+    </ul>
+  );
+
+  const guestLinks = (
         <ul>
           <li><Link to="#">Developers</Link></li>
           <li><Link to="/register">Register</Link></li>
           <li><Link to="/login">Login</Link></li>
         </ul>
+  );
+
+    return (
+        <nav className="navbar bg-dark">
+        <h1>
+          <Link to='/'><FontAwesomeIcon icon={faCoffee} /> DevConnector</Link>
+        </h1>
+
+      { !loading && (<Fragment>{
+        isAuthenticated ? authLinks : guestLinks
+      }</Fragment>) }
       </nav>
     )
+};
+
+Navbar.propTypes ={
+  logout: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired
 }
 
-export default Navbar
+const mapStateToProps = state => ({
+  auth: state.auth
+})
+
+export default connect(mapStateToProps, {logout})(Navbar);
