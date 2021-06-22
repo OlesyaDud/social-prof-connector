@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../../middleware/auth');
 const User = require('../../model/User');
 const Profile = require('../../model/Profile');
+const Post = require('../../model/Post');
 const request = require('request');
 const config = require('config');
 const { body, validationResult } = require('express-validator');
@@ -65,32 +66,22 @@ async (req, res) => {
       if(telegram) profileFields.social.telegram = telegram;
       if(linkedin) profileFields.social.linkedin = linkedin;
 
-        console.log(profileFields.skills);
+        // console.log(profileFields.skills);
         
         try {
-            let profile = await Profile.findOne({user: req.user._id});
-
-            // update
-            if(profile) {
-                profile = await Profile.findByIdAndUpdate(
-                {user: req.user._id}, 
-                {$set: profileFields},
-                {new: true});
-
-                return res.json(profile);
-            }
-
-            // not found , create profile
-            profile = new Profile(profileFields);
-            await profile.save();
-            res.json(profile);
-
-        } catch (error) {
-            console.error(error.message);
-            res.status(500).send('Server error');
+            // Using upsert option (creates new doc if no match is found):
+            let profile = await Profile.findOneAndUpdate(
+              { user: req.user.id },
+              { $set: profileFields },
+              { new: true, upsert: true, setDefaultsOnInsert: true }
+            );
+            return res.json(profile);
+          } catch (err) {
+            console.error(err.message);
+            return res.status(500).send('Server Error');
+          }
         }
-      }
-);
+      );
 
 // Get All Profiles 
 router.get('/', async (req, res) => {
@@ -124,6 +115,9 @@ router.get('/user/:user_id', async (req, res) => {
 // Delete profile
 router.delete('/', auth, async (req, res) => {
     try {
+
+        // delete user posts
+        await Post.deleteMany({user: req.user.id});
 
         // remove profile
        await Profile.findOneAndRemove({user: req.user.id});

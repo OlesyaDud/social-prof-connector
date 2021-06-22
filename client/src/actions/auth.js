@@ -7,7 +7,8 @@ import {
     AUTH_ERROR,
     LOGIN_SUCCESS,
     LOGIN_FAIL,
-    LOGOUT
+    LOGOUT,
+    CLEAR_PROFILE
 } from './types';
 import setAuthToken from '../utils/setAuthToken';
 
@@ -108,6 +109,8 @@ export const register = ({ name, email, password }) => async dispatch => {
 
 
 // logout
-export const logout =()=> dispatch => {
+export const logout =()=> dispatch => {  
+    // on logout user is not remaining in memory, so when a new user logs in , old user's info is not displayed
+    dispatch({type: CLEAR_PROFILE});
     dispatch({type: LOGOUT});
 }

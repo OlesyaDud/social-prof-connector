@@ -28,7 +28,7 @@ const Login = ( props ) => {
 
     return (
        <Fragment>
-        <h1 class="large text-primary">Sign In</h1>
+        <h1 className="large text-primary">Sign In</h1>
         <p className="lead"><i className="fas fa-user"></i> Sign into Your Account</p>
       <form className="form" onSubmit={e => onSubmit(e)}>
 
@@ -48,7 +48,7 @@ const Login = ( props ) => {
             type="password"
             placeholder="Password"
             name="password"
-            minLength="6"
+            minLength="5"
             value={password}
             onChange={e => onChange(e)} 
           />
